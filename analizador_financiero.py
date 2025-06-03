@@ -4,7 +4,16 @@ import yfinance as yf
 def obtener_datos(ticker: str) -> dict:
     """Obtiene datos financieros de un ticker usando yfinance."""
     accion = yf.Ticker(ticker)
-    info = accion.info
+    try:
+        info = accion.info
+    except Exception as exc:
+        raise RuntimeError(
+            f"Error al obtener datos del ticker {ticker}: {exc}"
+        ) from exc
+
+    if not info:
+        raise ValueError(f"No se encontraron datos para el ticker {ticker}")
+
     datos = {
         "Precio actual": info.get("currentPrice"),
         "Capitalizacion bursatil": info.get("marketCap"),
@@ -76,7 +85,11 @@ def main():
     if not ticker:
         print("Ticker no valido")
         return
-    datos = obtener_datos(ticker)
+    try:
+        datos = obtener_datos(ticker)
+    except Exception as exc:
+        print(f"Error al obtener datos: {exc}")
+        return
     mostrar_resultados(ticker, datos)
 
 
